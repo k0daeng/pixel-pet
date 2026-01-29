@@ -492,7 +492,7 @@ const firebaseConfig = {
   measurementId: "G-R3ZDKEXMPG",
 };
 const FCM_VAPID_KEY = "BL7dnxAeCMgkNtpQMQ1rXxKLIozegLEyPlCMzSS6oFAGKc_e8ikVKv7SF7H7HWorMPhQU-rT1FTdktYYjwgmiiY";
-const PUSH_COOLDOWN_MS = 60 * 60 * 1000;
+const PUSH_COOLDOWN_MS = 60 * 1000;
 const PUSH_STATE_INTERVAL_MS = 60 * 1000;
 const DEVICE_ID_KEY = "pixel_pet_device_id";
 
