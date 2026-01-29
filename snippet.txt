@@ -1,0 +1,23 @@
+function detectUserMood(text) {
+
+  const t = text.toLowerCase();
+
+  if (t.match(/(¥��|ȭ��|����|����|��ħ|��|angry)/)) return "angry";
+
+  if (t.match(/(����|����|����|��ħ|�ӻ�|����|sad)/)) return "sad";
+
+  if (t.match(/(����|�ڰ�|�ǰ�|����|����|����|sleepy)/)) return "sleepy";
+
+  if (t.match(/(����|����|�԰�|����|������|hungry)/)) return "hungry";
+
+  if (t.match(/(������|����|����|����|�ְ�|����|����|happy)/)) return "happy";
+
+  if (t.match(/(�׳�|����|�𸣰�|�ָ�|����|neutral)/)) return "neutral";
+
+  return null;
+
+}
+
+
+
+function getTimeOfDay

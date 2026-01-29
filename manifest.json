@@ -1,0 +1,21 @@
+{
+  "name": "Pixel Pet",
+  "short_name": "Pixel Pet",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f2f2f2",
+  "theme_color": "#f2f2f2",
+  "description": "Monotone pixel pet toy.",
+  "icons": [
+    {
+      "src": "img/192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "img/512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

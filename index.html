@@ -1,0 +1,164 @@
+﻿<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f2f2f2" />
+    <title>Pixel Pet</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap"
+    />
+  </head>
+  <body>
+    <main class="stage">
+      <div class="layout">
+        <section class="toy">
+          <header class="toy__header">
+            <div class="toy__brand">PIXEL PET</div>
+            <div class="toy__tag">MONO TOY</div>
+          </header>
+          <div class="screen">
+            <canvas id="screen" width="128" height="128" aria-label="pixel pet"></canvas>
+            <div class="screen__dead" id="screenDead" hidden></div>
+            <div class="speech" id="speech" aria-live="polite" hidden></div>
+            <div class="chat-panel" id="chatPanel" hidden>
+              <div class="chat-header">
+                <div class="chat-title">CHAT</div>
+                <div class="chat-actions">
+                  <button class="chat-clear" id="chatClear" type="button" aria-label="clear chat">CLEAR</button>
+                  <button class="chat-close" id="chatClose" type="button" aria-label="close chat">X</button>
+                </div>
+              </div>
+              <div class="chat-log" id="chatLog" aria-live="polite"></div>
+              <form class="chat-input" id="chatForm">
+                <input
+                  class="chat-field"
+                  id="chatField"
+                  type="text"
+                  placeholder="메시지..."
+                  autocomplete="off"
+                />
+                <button class="chat-send" type="submit">전송</button>
+              </form>
+            </div>
+            <div class="action-menu action-menu--main" id="actionMenuMain" role="menu" hidden>
+              <button class="action-menu__item" type="button" role="menuitem" data-action="care">돌봄</button>
+              <button class="action-menu__item" type="button" role="menuitem" data-action="adventure">모험</button>
+              <button class="action-menu__item" type="button" role="menuitem" data-action="shop">상점</button>
+              <button class="action-menu__item" type="button" role="menuitem" data-action="settings">환경설정</button>
+            </div>
+            <div class="action-menu action-menu--care" id="actionMenuCare" role="menu" hidden>
+              <button class="action-menu__item" type="button" role="menuitem" data-action="feed">밥주기</button>
+              <button class="action-menu__item" type="button" role="menuitem" data-action="wash">씻기기</button>
+              <button class="action-menu__item" type="button" role="menuitem" data-action="medicine">약먹이기</button>
+              <button class="action-menu__item" type="button" role="menuitem" data-action="sleep">재우기</button>
+            </div>
+            <div class="modal-overlay" id="modalOverlay" hidden>
+              <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+                <div class="modal__title" id="modalTitle">알림</div>
+                <div class="modal__body">
+                  <div class="modal__content" id="modalContent"></div>
+                  <div class="modal__settings" id="modalSettings" hidden>
+                    <label class="modal__check">
+                      <span>배경음</span>
+                      <input class="modal__range" type="range" id="settingBgm" min="0" max="100" value="35" />
+                    </label>
+                    <label class="modal__check">
+                      <span>효과음</span>
+                      <input class="modal__range" type="range" id="settingSfx" min="0" max="100" value="60" />
+                    </label>
+                    <button class="modal__btn" id="settingsAdmin" type="button">관리자 설정</button>
+                  </div>
+                  <div class="modal__admin" id="modalAdmin" hidden>
+                    <label class="modal__label" for="adminPasswordInput">비밀번호</label>
+                    <input class="modal__input" id="adminPasswordInput" type="password" inputmode="numeric" maxlength="8" />
+                    <div class="modal__hint" id="adminPasswordError" hidden></div>
+                    <button class="modal__btn" id="adminPasswordSubmit" type="button">확인</button>
+                  </div>
+                  <div class="modal__admin-panel" id="adminPanel" hidden>
+                    <div class="admin-panel__section">
+                      <div class="admin-panel__title">STATE</div>
+                      <div class="admin-panel__grid">
+                        <button class="admin-panel__btn" id="statePoop" type="button">똥</button>
+                        <button class="admin-panel__btn" id="stateHungry" type="button">배고픔</button>
+                        <button class="admin-panel__btn" id="stateDirty" type="button">더러움</button>
+                        <button class="admin-panel__btn" id="stateSleepy" type="button">졸림</button>
+                        <button class="admin-panel__btn" id="stateSick" type="button">아픔</button>
+                        <button class="admin-panel__btn" id="stateAnnoyed" type="button">짜증</button>
+                        <button class="admin-panel__btn" id="stateDeath" type="button">죽음</button>
+                        <button class="admin-panel__btn" id="stateNotify" type="button">알림 테스트</button>
+                      </div>
+                    </div>
+                    <div class="admin-panel__section">
+                      <div class="admin-panel__title">STATS</div>
+                      <div class="admin-panel__stats">
+                        <div class="stat-row">
+                          <div class="stat-label">HUN</div>
+                          <div class="stat-bar"><div class="stat-fill stat-fill--hunger" id="statHunger"></div></div>
+                        </div>
+                        <div class="stat-row">
+                          <div class="stat-label">HP</div>
+                          <div class="stat-bar"><div class="stat-fill stat-fill--health" id="statHealth"></div></div>
+                        </div>
+                        <div class="stat-row">
+                          <div class="stat-label">CLN</div>
+                          <div class="stat-bar"><div class="stat-fill stat-fill--clean" id="statClean"></div></div>
+                        </div>
+                        <div class="stat-row">
+                          <div class="stat-label">HAP</div>
+                          <div class="stat-bar"><div class="stat-fill stat-fill--happy" id="statHappy"></div></div>
+                        </div>
+                        <div class="stat-row">
+                          <div class="stat-label">ENG</div>
+                          <div class="stat-bar"><div class="stat-fill stat-fill--energy" id="statEnergy"></div></div>
+                        </div>
+                        <div class="stat-row">
+                          <div class="stat-label">LIFE</div>
+                          <div class="stat-bar"><div class="stat-fill stat-fill--life" id="statLife"></div></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal__name" id="modalName" hidden>
+                    <label class="modal__label" id="modalNameLabel" for="modalNameInput">누구</label>
+                    <input class="modal__input" id="modalNameInput" type="text" maxlength="12" />
+                  </div>
+                </div>
+                <div class="modal__actions">
+                  <button class="modal__btn" id="modalSaveName" type="button">저장</button>
+                  <button class="modal__btn" id="modalClose" type="button">닫기</button>
+                </div>
+              </div>
+            </div>
+            <div class="screen__hint">AUTO MODE</div>
+          </div>
+          <footer class="toy__status">
+            <div class="status__label">MODE</div>
+            <div class="status__value" id="modeLabel">WALK</div>
+          </footer>
+          <section class="controls" aria-label="controls">
+            <div class="dpad" aria-label="direction pad">
+              <button class="dpad__key dpad__key--up" type="button" aria-label="up"></button>
+              <button class="dpad__key dpad__key--left" type="button" aria-label="left"></button>
+              <button class="dpad__key dpad__key--center" type="button" aria-label="select"></button>
+              <button class="dpad__key dpad__key--right" type="button" aria-label="right"></button>
+              <button class="dpad__key dpad__key--down" type="button" aria-label="down"></button>
+            </div>
+            <div class="action-buttons" aria-label="action buttons">
+              <button class="action-buttons__dot" id="actionBtn1" type="button" aria-label="button 1"></button>
+              <button class="action-buttons__dot" id="actionBtn2" type="button" aria-label="button 2"></button>
+            </div>
+          </section>
+        </section>
+      </div>
+    </main>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

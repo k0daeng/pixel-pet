@@ -1,0 +1,12 @@
+{
+  "name": "pixel-pet-push-alerts",
+  "private": true,
+  "version": "0.1.0",
+  "type": "commonjs",
+  "engines": {
+    "node": "18"
+  },
+  "dependencies": {
+    "firebase-admin": "^11.11.0"
+  }
+}

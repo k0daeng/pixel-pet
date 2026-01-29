@@ -1,0 +1,30 @@
+name: Push Alerts
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install deps
+        working-directory: tools/push-alerts
+        run: npm ci
+
+      - name: Send alerts
+        working-directory: tools/push-alerts
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          PUSH_COOLDOWN_MS: "3600000"
+          HUNGER_THRESHOLD: "30"
+        run: node index.js
