@@ -58,16 +58,16 @@ function normalizeState(state, now) {
 function computeHunger(state, now) {
   const savedAt = toNumber(state.savedAt, now);
   if (savedAt >= now) {
-    return { hunger: clamp(state.hunger, 0, 100), savedAt };
+    return { hunger: clamp(state.hunger, 0, 100), savedAt, steps: 0 };
   }
   const delta = now - savedAt;
   const steps = Math.floor(delta / VITAL_INTERVAL_MS);
   if (steps <= 0) {
-    return { hunger: clamp(state.hunger, 0, 100), savedAt };
+    return { hunger: clamp(state.hunger, 0, 100), savedAt, steps: 0 };
   }
   const decay = state.sleeping ? SLEEP_DECAY_FACTOR : 1;
   const hunger = clamp(state.hunger - HUNGER_DECAY * decay * steps, 0, 100);
-  return { hunger, savedAt: savedAt + steps * VITAL_INTERVAL_MS };
+  return { hunger, savedAt: savedAt + steps * VITAL_INTERVAL_MS, steps };
 }
 
 function shouldNotify(lastAt, now) {
@@ -82,7 +82,7 @@ async function handleDevice(doc, now) {
   const state = normalizeState(data.state, now);
   if (state.dead) return { update: { state, updatedAt: admin.firestore.FieldValue.serverTimestamp() } };
 
-  const { hunger, savedAt } = computeHunger(state, now);
+  const { hunger, savedAt, steps } = computeHunger(state, now);
   const dirty = state.clean <= DIRTY_THRESHOLD;
   const sleepy = !state.sleeping && state.energy <= SLEEPY_THRESHOLD;
   const annoyed = state.happy <= ANNOYED_THRESHOLD;
@@ -121,7 +121,47 @@ async function handleDevice(doc, now) {
     }
   }
 
-  const nextState = { ...state, hunger, savedAt };
+  const decay = state.sleeping ? SLEEP_DECAY_FACTOR : 1;
+  const poopPenalty = Array.isArray(state.poops) ? state.poops.length : 0;
+  const energyDelta = state.sleeping ? 3 : -1;
+  let cleanVal = clamp(state.clean - (1 + poopPenalty) * decay * steps, 0, 100);
+  let happyVal = clamp(state.happy - 1 * decay * steps, 0, 100);
+  let energyVal = clamp(state.energy + energyDelta * steps, 0, 100);
+  let lifeVal = clamp(state.life, 0, 100);
+  let healthVal = clamp(state.health, 0, 100);
+  if (hunger <= HUNGER_THRESHOLD) {
+    happyVal = clamp(happyVal - steps, 0, 100);
+  }
+  if (cleanVal <= DIRTY_THRESHOLD) {
+    happyVal = clamp(happyVal - steps, 0, 100);
+  }
+  if (hunger <= HUNGER_THRESHOLD / 2) {
+    healthVal = clamp(healthVal - 2 * steps, 0, 100);
+    lifeVal = clamp(lifeVal - 2 * steps, 0, 100);
+  }
+  if (cleanVal <= DIRTY_THRESHOLD / 2) {
+    healthVal = clamp(healthVal - 2 * steps, 0, 100);
+    lifeVal = clamp(lifeVal - 2 * steps, 0, 100);
+  }
+  if (state.sick) {
+    healthVal = clamp(healthVal - 2 * steps, 0, 100);
+  }
+  if (!state.sleeping && energyVal <= 10) {
+    healthVal = clamp(healthVal - steps, 0, 100);
+  }
+  if (healthVal <= 20) {
+    lifeVal = clamp(lifeVal - 4 * steps, 0, 100);
+  }
+  const nextState = {
+    ...state,
+    hunger,
+    clean: cleanVal,
+    happy: happyVal,
+    energy: energyVal,
+    health: healthVal,
+    life: lifeVal,
+    savedAt: now,
+  };
   const update = {
     state: nextState,
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
