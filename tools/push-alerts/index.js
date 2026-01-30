@@ -24,6 +24,9 @@ const VITAL_INTERVAL_MS = Number(process.env.VITAL_INTERVAL_MS || 10000);
 const HUNGER_DECAY = Number(process.env.HUNGER_DECAY || 0.05);
 const SLEEP_DECAY_FACTOR = Number(process.env.SLEEP_DECAY_FACTOR || 0.5);
 const HUNGER_THRESHOLD = Number(process.env.HUNGER_THRESHOLD || 30);
+const DIRTY_THRESHOLD = Number(process.env.DIRTY_THRESHOLD || 25);
+const SLEEPY_THRESHOLD = Number(process.env.SLEEPY_THRESHOLD || 25);
+const ANNOYED_THRESHOLD = Number(process.env.ANNOYED_THRESHOLD || 25);
 const PUSH_COOLDOWN_MS = Number(process.env.PUSH_COOLDOWN_MS || 60 * 60 * 1000);
 
 function clamp(value, min, max) {
@@ -80,24 +83,38 @@ async function handleDevice(doc, now) {
   if (state.dead) return { update: { state, updatedAt: admin.firestore.FieldValue.serverTimestamp() } };
 
   const { hunger, savedAt } = computeHunger(state, now);
+  const dirty = state.clean <= DIRTY_THRESHOLD;
+  const sleepy = !state.sleeping && state.energy <= SLEEPY_THRESHOLD;
+  const annoyed = state.happy <= ANNOYED_THRESHOLD;
   const hungry = !state.sleeping && hunger <= HUNGER_THRESHOLD;
   const lastNotified = data.lastNotified || {};
-  let sent = false;
+  const statusConfigs = [
+    { key: "hungry", condition: hungry, body: "나 배고파!" },
+    { key: "dirty", condition: dirty, body: "내 몸에서 냄새가 나!" },
+    { key: "sleepy", condition: sleepy, body: "하암~ 나 너무 졸려." },
+    { key: "sick", condition: state.sick, body: "콜록콜록, 나 몸이 안 좋아." },
+    { key: "annoyed", condition: annoyed, body: "흥! 치! 뿌!" },
+  ];
+  const newNotified = { ...lastNotified };
+  const title = data.petName || "펫";
   let removeToken = false;
+  let notificationsSent = false;
 
-  if (hungry && shouldNotify(lastNotified.hungry, now)) {
-    const title = data.petName || "펫";
-    const body = "나 배고파!";
+  for (const config of statusConfigs) {
+    if (!config.condition) continue;
+    if (!shouldNotify(lastNotified[config.key], now)) continue;
     try {
       await admin.messaging().send({
         token,
-        notification: { title, body },
+        notification: { title, body: config.body },
       });
-      sent = true;
+      newNotified[config.key] = now;
+      notificationsSent = true;
     } catch (err) {
       const code = err?.code || "";
       if (code === "messaging/registration-token-not-registered" || code === "messaging/invalid-registration-token") {
         removeToken = true;
+        break;
       } else {
         console.error("FCM send failed:", code || err?.message || err);
       }
@@ -109,8 +126,8 @@ async function handleDevice(doc, now) {
     state: nextState,
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   };
-  if (sent) {
-    update.lastNotified = { ...lastNotified, hungry: now };
+  if (notificationsSent) {
+    update.lastNotified = newNotified;
   }
   if (removeToken) {
     update.token = admin.firestore.FieldValue.delete();

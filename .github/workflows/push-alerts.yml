@@ -25,6 +25,9 @@ jobs:
         working-directory: tools/push-alerts
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          PUSH_COOLDOWN_MS: "60000"
+          PUSH_COOLDOWN_MS: "3600000"
           HUNGER_THRESHOLD: "30"
+          DIRTY_THRESHOLD: "25"
+          SLEEPY_THRESHOLD: "25"
+          ANNOYED_THRESHOLD: "25"
         run: node index.js
