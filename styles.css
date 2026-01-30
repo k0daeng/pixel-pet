@@ -516,13 +516,17 @@ body {
 
 .modal-overlay {
   position: fixed;
-  inset: 0;
-  margin: 12px;
-  background: rgba(0, 0, 0, 0.6);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.85);
   display: grid;
   place-items: center;
-  z-index: 60;
-  border-radius: 10px;
+  z-index: 214748;
+  border-radius: 0;
+  pointer-events: auto;
 }
 
 .modal-overlay[hidden] {
@@ -541,6 +545,7 @@ body {
   font-size: 0.62rem;
   font-family: "Gowun Dodum", "Press Start 2P", sans-serif;
   z-index: 61;
+  pointer-events: auto;
 }
 
 .modal__title {

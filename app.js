@@ -53,6 +53,15 @@ const chatClear = document.getElementById("chatClear");
 const modalOverlay = document.getElementById("modalOverlay");
 const modalShell = document.querySelector(".modal");
 
+function ensureModalOverlayRoot() {
+  if (!modalOverlay) return;
+  if (modalOverlay.parentElement !== document.body) {
+    document.body.appendChild(modalOverlay);
+  }
+}
+
+ensureModalOverlayRoot();
+
 const modalTitle = document.getElementById("modalTitle");
 
 const modalContent = document.getElementById("modalContent");
