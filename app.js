@@ -87,6 +87,8 @@ const settingBgm = document.getElementById("settingBgm");
 const settingSfx = document.getElementById("settingSfx");
 
 const settingsReset = document.getElementById("settingsReset");
+
+const adminResetDevice = document.getElementById("adminResetDevice");
 const settingsAdmin = document.getElementById("settingsAdmin");
 
 const statePoopBtn = document.getElementById("statePoop");
@@ -810,6 +812,25 @@ function ensureDeviceId() {
     deviceId = createDeviceId();
   }
   return deviceId;
+}
+
+function resetDeviceId() {
+  if (!window.confirm("기기 등록 정보를 초기화하고 새로운 Firestore 문서를 생성할까요?")) {
+    return;
+  }
+  try {
+    localStorage.removeItem(DEVICE_ID_KEY);
+  } catch {
+    // ignore
+  }
+  deviceId = "";
+  ensureDeviceId();
+  if (modalOverlay && modalOverlay.hidden === false) {
+    openInfoModal("새 기기 등록", "기기 ID를 초기화했어요. 페이지를 새로고침합니다.");
+  }
+  setTimeout(() => {
+    window.location.reload();
+  }, 100);
 }
 
 function initFirebaseMessaging() {
@@ -5430,6 +5451,12 @@ if (settingsReset) {
 
   });
 
+}
+if (adminResetDevice) {
+  adminResetDevice.addEventListener("click", () => {
+    playButtonSfx();
+    resetDeviceId();
+  });
 }
 if (settingsAdmin) {
   settingsAdmin.addEventListener("click", () => {
